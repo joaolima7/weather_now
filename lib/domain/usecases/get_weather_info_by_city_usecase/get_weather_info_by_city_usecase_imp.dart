@@ -7,7 +7,7 @@ class GetWeatherInfoByCityUseCaseImp implements GetWeatherInfoByCityUseCase {
   GetWeatherInfoByCityUseCaseImp(this._getWeatherInfoByCityRepository);
 
   @override
-  Future<List<WeatherInfoEntity>> call(String cityName) async {
+  Future<WeatherInfoEntity> call(String cityName) async {
     return await _getWeatherInfoByCityRepository(cityName);
   }
 }
