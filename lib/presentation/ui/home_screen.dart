@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:lottie/lottie.dart';
+import 'package:weather_now/domain/usecases/get_weather_info_by_city_usecase/get_weather_info_by_city_usecase.dart';
+import 'package:weather_now/presentation/components/forecast_day_item.dart';
+import 'package:weather_now/presentation/components/info_item.dart';
 
 class HomeScreen extends StatelessWidget {
+  final GetWeatherInfoByCityUseCase _getWeatherInfoByCityUseCase =
+      GetIt.I.get<GetWeatherInfoByCityUseCase>();
   final List<String> savedCities = [
     'Fortaleza',
     'São Paulo',
@@ -9,8 +15,13 @@ class HomeScreen extends StatelessWidget {
     'Curitiba'
   ];
 
+  final List<Map<String, String>> nextPrevisions = [
+    {'day': 'Segunda', 'max': '10', 'min': '9'}
+  ];
+
   @override
   Widget build(BuildContext context) {
+    var _sizeWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF000428),
@@ -19,7 +30,6 @@ class HomeScreen extends StatelessWidget {
           children: [
             PopupMenuButton<String>(
               onSelected: (String value) {
-                // Ação a ser tomada quando uma cidade for selecionada
                 print('Cidade selecionada: $value');
               },
               itemBuilder: (BuildContext context) {
@@ -40,7 +50,7 @@ class HomeScreen extends StatelessWidget {
                   Text(
                     'Fortaleza',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: _sizeWidth * .05,
                       color: Colors.white,
                     ),
                   ),
@@ -66,40 +76,41 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       body: Container(
+        height: double.maxFinite,
+        width: double.maxFinite,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
               Color(0xFF000428),
-              Color(0xFF4A90E2), // Azul claro
-// Azul escuro
+              Color(0xFF4A90E2),
             ],
           ),
         ),
-        child: Column(
-          children: [
-            Expanded(
-              child: Column(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Lottie.asset(
-                    'assets/animations/weather.json', // Animação Lottie, insira o caminho correto
-                    width: 150,
-                    height: 150,
+                    'assets/animations/weather.json',
+                    width: _sizeWidth * .4,
+                    height: _sizeWidth * .4,
                   ),
                   Text(
                     '28°',
                     style: TextStyle(
-                      fontSize: 80,
+                      fontSize: _sizeWidth * .18,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
                   Text(
-                    'Precipitations',
+                    'Chuvas Intensas',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: _sizeWidth * .05,
                       color: Colors.white70,
                     ),
                   ),
@@ -107,142 +118,124 @@ class HomeScreen extends StatelessWidget {
                   Text(
                     'Max.: 31°   Min.: 25°',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: _sizeWidth * .05,
                       color: Colors.white70,
                     ),
                   ),
                   SizedBox(height: 20),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _weatherInfoItem(Icons.water_drop, '6%'),
-                        _weatherInfoItem(Icons.thermostat, '90%'),
-                        _weatherInfoItem(Icons.air, '19 km/h'),
-                      ],
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(255, 82, 129, 182),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          InfoItem(icon: Icons.water_drop, value: '6%'),
+                          InfoItem(icon: Icons.thermostat, value: '90%'),
+                          InfoItem(icon: Icons.air, value: '19 kmh'),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Today',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    SizedBox(
-                      height: 100,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          _hourlyForecastItem('29°C', '15.00'),
-                          _hourlyForecastItem('26°C', '16.00'),
-                          _hourlyForecastItem('24°C', '17.00',
-                              isHighlighted: true),
-                          _hourlyForecastItem('23°C', '18.00'),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Color.fromARGB(255, 82, 129, 182),
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Text(
+                              'Hoje',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white),
+                            ),
+                          ),
+                          Text(
+                            'Set, 9',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w200,
+                            ),
+                          )
                         ],
                       ),
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      'Next Forecast',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                      SizedBox(height: 15),
+                      Container(
+                        height: 130,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            ForecastDayItem(temp: '29°C', time: '15.00'),
+                            ForecastDayItem(temp: '26°C', time: '16.00'),
+                            ForecastDayItem(
+                                temp: '24°C',
+                                time: '17.00',
+                                isHighlighted: true),
+                            ForecastDayItem(temp: '23°C', time: '18.00'),
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    _nextForecastItem('Monday', '13°C', '10°C'),
-                    _nextForecastItem('Tuesday', '17°C', '12°C'),
-                    // Continue adicionando mais previsões semanais
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Color.fromARGB(255, 82, 129, 182),
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Text(
+                              'Próximas Previsões',
+                              style: TextStyle(
+                                  fontSize: _sizeWidth * .048,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white),
+                            ),
+                          ),
+                          Icon(
+                            Icons.calendar_month,
+                            size: _sizeWidth * .06,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 15),
+                      Column(
+                        children: nextPrevisions
+                            .map((e) => Text('${e['day']}'))
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _weatherInfoItem(IconData icon, String value) {
-    return Column(
-      children: [
-        Icon(
-          icon,
-          color: Colors.white,
-          size: 28,
-        ),
-        SizedBox(height: 5),
-        Text(
-          value,
-          style: TextStyle(color: Colors.white, fontSize: 16),
-        ),
-      ],
-    );
-  }
-
-  Widget _hourlyForecastItem(String temp, String time,
-      {bool isHighlighted = false}) {
-    return Container(
-      width: 70,
-      margin: EdgeInsets.only(right: 10),
-      decoration: BoxDecoration(
-        color: isHighlighted
-            ? Colors.blueAccent.withOpacity(0.3)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        border:
-            Border.all(color: isHighlighted ? Colors.blueAccent : Colors.grey),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            temp,
-            style: TextStyle(color: Colors.black, fontSize: 16),
-          ),
-          Text(
-            time,
-            style: TextStyle(color: Colors.black, fontSize: 14),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _nextForecastItem(String day, String maxTemp, String minTemp) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            day,
-            style: TextStyle(fontSize: 16),
-          ),
-          Text(
-            '$maxTemp   $minTemp',
-            style: TextStyle(fontSize: 16, color: Colors.black54),
-          ),
-        ],
       ),
     );
   }
