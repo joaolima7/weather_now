@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
 import 'package:lottie/lottie.dart';
-import 'package:weather_now/domain/usecases/get_weather_info_by_city_usecase/get_weather_info_by_city_usecase.dart';
 import 'package:weather_now/presentation/components/forecast_day_item.dart';
 import 'package:weather_now/presentation/components/info_item.dart';
+import 'package:weather_now/presentation/controllers/get_controller.dart';
 
-class HomeScreen extends StatelessWidget {
-  final GetWeatherInfoByCityUseCase _getWeatherInfoByCityUseCase =
-      GetIt.I.get<GetWeatherInfoByCityUseCase>();
+import '../../core/utils/utils.dart';
+
+class HomeScreen extends StatefulWidget {
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  // Obtém o controlador via GetIt
+  final _controller = GetIt.I<GetWeatherController>();
+
   final List<String> savedCities = [
     'Fortaleza',
     'São Paulo',
@@ -20,17 +30,57 @@ class HomeScreen extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Verifica as permissões e tenta buscar a localização
+    _determinePositionAndFetchWeather();
+  }
+
+  // Método para solicitar permissões de localização e buscar o clima
+  Future<void> _determinePositionAndFetchWeather() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Verifica se o serviço de localização está habilitado
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      Get.snackbar('Error',
+          'Serviço de localização desabilitado. Habilite para continuar.');
+      return;
+    }
+
+    // Verifica as permissões de localização
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        Get.snackbar('Erro', 'Permissão de localização negada.');
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      Get.snackbar('Erro', 'Habilite a localização nas configurações.');
+      return;
+    }
+
+    // Busca a localização e atualiza o clima
+    await _controller.getWeatherByLocation();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var _sizeWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF000428),
-        elevation: 0,
         title: Row(
           children: [
             PopupMenuButton<String>(
               onSelected: (String value) {
-                print('Cidade selecionada: $value');
+                _controller.getWeatherByCityName(
+                    value); // Chama o método do controlador
               },
               itemBuilder: (BuildContext context) {
                 return savedCities.map((String city) {
@@ -46,7 +96,7 @@ class HomeScreen extends StatelessWidget {
                     Icons.location_on,
                     color: Colors.white,
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
                     'Fortaleza',
                     style: TextStyle(
@@ -91,58 +141,78 @@ class HomeScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Lottie.asset(
-                    'assets/animations/weather.json',
-                    width: _sizeWidth * .4,
-                    height: _sizeWidth * .4,
-                  ),
-                  Text(
-                    '28°',
-                    style: TextStyle(
-                      fontSize: _sizeWidth * .18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+              Obx(() {
+                // Exibe o carregamento enquanto o dado é obtido
+                if (_controller.isLoading.value) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                final weatherInfo = _controller.weatherInfo.value;
+
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Lottie.asset(
+                      'assets/animations/weather.json',
+                      width: _sizeWidth * .4,
+                      height: _sizeWidth * .4,
                     ),
-                  ),
-                  Text(
-                    'Chuvas Intensas',
-                    style: TextStyle(
-                      fontSize: _sizeWidth * .05,
-                      color: Colors.white70,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Max.: 31°   Min.: 25°',
-                    style: TextStyle(
-                      fontSize: _sizeWidth * .05,
-                      color: Colors.white70,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Color.fromARGB(255, 82, 129, 182),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          InfoItem(icon: Icons.water_drop, value: '6%'),
-                          InfoItem(icon: Icons.thermostat, value: '90%'),
-                          InfoItem(icon: Icons.air, value: '19 kmh'),
-                        ],
+                    Text(
+                      '${weatherInfo.main.temp}°',
+                      style: TextStyle(
+                        fontSize: _sizeWidth * .18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
-                  ),
-                ],
-              ),
+                    Text(
+                      weatherInfo.weather.isNotEmpty
+                          ? Utils.capitalize(
+                              weatherInfo.weather.first.description)
+                          : 'Sem dados',
+                      style: TextStyle(
+                        fontSize: _sizeWidth * .05,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Max.: ${weatherInfo.main.tempMax}°   Min.: ${weatherInfo.main.tempMin}°',
+                      style: TextStyle(
+                        fontSize: _sizeWidth * .05,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 82, 129, 182),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            InfoItem(
+                                icon: Icons.water_drop,
+                                value: '${weatherInfo.main.humidity}%'),
+                            InfoItem(
+                                icon: Icons.thermostat,
+                                value: '${weatherInfo.main.pressure} hPa'),
+                            InfoItem(
+                                icon: Icons.air,
+                                value: '${weatherInfo.wind.speed} km/h'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }),
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
@@ -175,7 +245,7 @@ class HomeScreen extends StatelessWidget {
                           )
                         ],
                       ),
-                      SizedBox(height: 15),
+                      const SizedBox(height: 15),
                       Container(
                         height: 130,
                         child: ListView(
@@ -223,7 +293,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      SizedBox(height: 15),
+                      const SizedBox(height: 15),
                       Column(
                         children: nextPrevisions
                             .map((e) => Text('${e['day']}'))
@@ -233,6 +303,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              ElevatedButton(onPressed: () {}, child: Text('Teste'))
             ],
           ),
         ),

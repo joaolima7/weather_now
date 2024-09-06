@@ -1,9 +1,6 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:convert';
-
 class MainWeatherEntity {
   final double temp;
-  final double feelsLike;
+  final double? feelsLike;
   final double tempMin;
   final double tempMax;
   final int pressure;
@@ -31,10 +28,12 @@ class MainWeatherEntity {
 
   factory MainWeatherEntity.fromMap(Map<String, dynamic> map) {
     return MainWeatherEntity(
-      temp: map['temp'] as double,
-      feelsLike: map['feelsLike'] as double,
-      tempMin: map['tempMin'] as double,
-      tempMax: map['tempMax'] as double,
+      temp: (map['temp'] as num).toDouble(),
+      feelsLike: map['feels_like'] != null
+          ? (map['feels_like'] as num).toDouble()
+          : null,
+      tempMin: (map['temp_min'] as num).toDouble(),
+      tempMax: (map['temp_max'] as num).toDouble(),
       pressure: map['pressure'] as int,
       humidity: map['humidity'] as int,
     );

@@ -10,6 +10,10 @@ class CoordEntity {
     required this.lat,
   });
 
+  CoordEntity.empty()
+      : lon = 0.0,
+        lat = 0.0;
+
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'lon': lon,

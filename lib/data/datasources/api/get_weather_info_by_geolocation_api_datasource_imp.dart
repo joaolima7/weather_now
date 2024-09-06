@@ -1,19 +1,20 @@
 import 'package:dio/dio.dart';
 import 'package:weather_now/core/utils/conts.dart';
 import 'package:weather_now/core/utils/http_manager.dart';
-import 'package:weather_now/data/datasources/get_weather_info_by_city_datasource.dart';
+import 'package:weather_now/data/datasources/get_weather_info_by_geolocation_datasource.dart';
 import 'package:weather_now/domain/entities/weather_info.dart';
 
-class GetWeatherInfoByCityApiDataSourceImp
-    implements GetWeatherInfoByCityDataSource {
-  final httpManager = HttpManager(baseUrl: urlBase);
+class GetWeatherInfoByGeolocationApiDataSourceImp
+    implements GetWeatherInfoByGeolocationDataSource {
   @override
-  Future<WeatherInfoEntity> call(String cityName) async {
+  Future<WeatherInfoEntity> call(double lon, double lat) async {
+    final httpManager = HttpManager(baseUrl: urlBase);
     try {
       final response = await httpManager.get(
         '/weather',
         queryParameters: {
-          'q': cityName,
+          'lat': lat,
+          'lon': lon,
           'appid': apiKey,
           'units': 'metric',
           'lang': 'pt_br',
