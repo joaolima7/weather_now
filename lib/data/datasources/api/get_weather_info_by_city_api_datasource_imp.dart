@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:weather_now/core/utils/conts.dart';
 import 'package:weather_now/core/utils/http_manager.dart';
@@ -8,7 +9,7 @@ class GetWeatherInfoByCityApiDataSourceImp
     implements GetWeatherInfoByCityDataSource {
   final httpManager = HttpManager(baseUrl: urlBase);
   @override
-  Future<WeatherInfoEntity> call(String cityName) async {
+  Future<Either<Exception, WeatherInfoEntity>> call(String cityName) async {
     try {
       final response = await httpManager.get(
         '/weather',
@@ -19,9 +20,9 @@ class GetWeatherInfoByCityApiDataSourceImp
           'lang': 'pt_br',
         },
       );
-      return WeatherInfoEntity.fromMap(response.data);
-    } on DioException catch (e) {
-      throw e;
+      return Right(WeatherInfoEntity.fromMap(response.data));
+    } catch (e) {
+      return Left(Exception('Erro ao encontrar cidade!'));
     }
   }
 }

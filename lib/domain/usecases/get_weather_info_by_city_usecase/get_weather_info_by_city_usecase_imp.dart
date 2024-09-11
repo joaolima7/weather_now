@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:weather_now/domain/entities/weather_info.dart';
 import 'package:weather_now/domain/repositories/get_weather_info_by_city_repository.dart';
 import 'package:weather_now/domain/usecases/get_weather_info_by_city_usecase/get_weather_info_by_city_usecase.dart';
@@ -7,7 +8,7 @@ class GetWeatherInfoByCityUseCaseImp implements GetWeatherInfoByCityUseCase {
   GetWeatherInfoByCityUseCaseImp(this._getWeatherInfoByCityRepository);
 
   @override
-  Future<WeatherInfoEntity> call(String cityName) async {
+  Future<Either<Exception, WeatherInfoEntity>> call(String cityName) async {
     return await _getWeatherInfoByCityRepository(cityName);
   }
 }
