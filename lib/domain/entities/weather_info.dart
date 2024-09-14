@@ -1,5 +1,6 @@
 import 'cloud_entity.dart';
 import 'coord_entity.dart';
+import 'forecast_entity.dart';
 import 'main_weather_entity.dart';
 import 'sys_entity.dart';
 import 'weather_entity.dart';
@@ -7,17 +8,16 @@ import 'wind_entity.dart';
 
 class WeatherInfoEntity {
   final CoordEntity coord;
-  final List<WeatherEntity> weather; // Agora é uma lista
+  final List<WeatherEntity> weather;
   final MainWeatherEntity main;
   final WindEntity wind;
   final CloudEntity clouds;
   final SysEntity sys;
   final String name;
 
-  // Construtor
   WeatherInfoEntity({
     required this.coord,
-    required this.weather, // Atualizado para ser uma lista
+    required this.weather,
     required this.main,
     required this.wind,
     required this.clouds,
@@ -44,7 +44,7 @@ class WeatherInfoEntity {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'coord': coord.toMap(),
-      'weather': weather.map((x) => x.toMap()).toList(), // Mapeando a lista
+      'weather': weather.map((x) => x.toMap()).toList(),
       'main': main.toMap(),
       'wind': wind.toMap(),
       'clouds': clouds.toMap(),

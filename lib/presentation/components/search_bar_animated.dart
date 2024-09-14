@@ -14,7 +14,8 @@ class SearchAnimated extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimSearchBar(
-      animationDurationInMilli: 300,
+      color: Colors.transparent,
+      searchIconColor: Colors.white,
       helpText: 'Pesquise aqui...',
       width: MediaQuery.of(context).size.width,
       textController: controller,

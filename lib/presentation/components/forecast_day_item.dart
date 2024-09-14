@@ -4,12 +4,14 @@ class ForecastDayItem extends StatelessWidget {
   final bool isHighlighted;
   final String temp;
   final String time;
+  final String iconPath;
 
   const ForecastDayItem({
     super.key,
     this.isHighlighted = false,
     required this.temp,
     required this.time,
+    required this.iconPath,
   });
 
   @override
@@ -27,12 +29,12 @@ class ForecastDayItem extends StatelessWidget {
         children: [
           Text(
             temp,
-            style: TextStyle(color: Colors.white, fontSize: 16),
+            style: TextStyle(color: Colors.white, fontSize: 14),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Image.asset(
-              'assets/images/storm.png',
+            child: Image.network(
+              iconPath,
               width: 35,
             ),
           ),

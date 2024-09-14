@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:weather_now/core/utils/conts.dart';
 import 'package:weather_now/core/utils/http_manager.dart';
@@ -7,7 +8,8 @@ import 'package:weather_now/domain/entities/weather_info.dart';
 class GetWeatherInfoByGeolocationApiDataSourceImp
     implements GetWeatherInfoByGeolocationDataSource {
   @override
-  Future<WeatherInfoEntity> call(double lon, double lat) async {
+  Future<Either<Exception, WeatherInfoEntity>> call(
+      double lon, double lat) async {
     final httpManager = HttpManager(baseUrl: urlBase);
     try {
       final response = await httpManager.get(
@@ -20,9 +22,9 @@ class GetWeatherInfoByGeolocationApiDataSourceImp
           'lang': 'pt_br',
         },
       );
-      return WeatherInfoEntity.fromMap(response.data);
-    } on DioException catch (e) {
-      throw e;
+      return right(WeatherInfoEntity.fromMap(response.data));
+    } catch (e) {
+      return left(Exception('Erro ao recuperar localização atual.'));
     }
   }
 }
