@@ -6,12 +6,12 @@ import '../components/forecast_day_item.dart';
 
 class TodayPredictions extends StatelessWidget {
   final List<ForecastEntity> todayForecasts;
-  final int highlightedIndex; // Adiciona essa propriedade
+  final int highlightedIndex;
 
   const TodayPredictions({
     super.key,
     required this.todayForecasts,
-    required this.highlightedIndex, // Adiciona este parâmetro
+    required this.highlightedIndex,
   });
 
   @override

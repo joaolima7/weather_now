@@ -12,6 +12,10 @@ class Utils {
   static String formatedNowDate() =>
       DateFormat('MMM, dd', 'pt_BR').format(DateTime.now()).toString();
 
+//Formatting date simple
+  static String formatSimpleDate(String date) =>
+      capitalize(DateFormat.EEEE('pt_BR').format(DateTime.parse(date)));
+
   //Path Web Weather Icon
   static String getPathIconWeather(String iconPath) =>
       'https://openweathermap.org/img/wn/${iconPath}@2x.png';

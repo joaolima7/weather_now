@@ -117,6 +117,50 @@ class GetWeatherController extends GetxController {
     return closestIndex;
   }
 
+  // Método para obter previsões futuras (excluindo as previsões de hoje)
+  List<Map<String, dynamic>> getNextPredictions() {
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    // Filtra as previsões que não são de hoje
+    final futureForecasts = forecasts.where((forecast) {
+      if (forecast.dtTxt != null) {
+        return !forecast.dtTxt!.startsWith(today);
+      }
+      return false;
+    }).toList();
+
+    // Agrupar as previsões por dia
+    final Map<String, List<ForecastEntity>> groupedByDate = {};
+    for (var forecast in futureForecasts) {
+      final date =
+          DateFormat('yyyy-MM-dd').format(DateTime.parse(forecast.dtTxt!));
+      if (groupedByDate.containsKey(date)) {
+        groupedByDate[date]!.add(forecast);
+      } else {
+        groupedByDate[date] = [forecast];
+      }
+    }
+
+    // Encontrar a menor temperatura mínima e a maior temperatura máxima para cada dia
+    final List<Map<String, dynamic>> nextPredictions = [];
+    groupedByDate.forEach((date, forecasts) {
+      double minTemp =
+          forecasts.map((f) => f.main.tempMin).reduce((a, b) => a < b ? a : b);
+      double maxTemp =
+          forecasts.map((f) => f.main.tempMax).reduce((a, b) => a > b ? a : b);
+
+      nextPredictions.add({
+        'date': date,
+        'minTemp': minTemp,
+        'maxTemp': maxTemp,
+        'icon': forecasts
+            .first.weather[0].icon, // Exemplo para exibir um ícone qualquer
+      });
+    });
+
+    return nextPredictions;
+  }
+
   //SearchBar SuffixTapSearch
   Future<void> suffixTapSearch() async {
     isSearching.value = false;

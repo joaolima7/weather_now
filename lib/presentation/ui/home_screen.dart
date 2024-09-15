@@ -105,7 +105,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 25),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
                   child: TodayPredictions(
                     todayForecasts: _controller.getTodayForecasts(),
                     highlightedIndex: _controller.findClosestForecastIndex(
@@ -113,12 +114,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 30),
-                  child: NextPredictions(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: NextPredictions(
+                      nextPredictions: _controller.getNextPredictions()),
                 ),
-                ElevatedButton(
-                    onPressed: _controller.teste, child: Text('Teste'))
+                const SizedBox(height: 25),
               ],
             ),
           ),

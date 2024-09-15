@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:weather_now/presentation/components/next_predictions_list_tile.dart';
+
+import '../../core/utils/utils.dart';
 
 class NextPredictions extends StatelessWidget {
-  const NextPredictions({super.key});
+  final List<Map<String, dynamic>> nextPredictions;
+
+  const NextPredictions({
+    super.key,
+    required this.nextPredictions,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +41,21 @@ class NextPredictions extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 15),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: nextPredictions.length,
+            itemBuilder: (context, index) {
+              final prediction = nextPredictions[index];
+
+              return NextPredictionsListTile(
+                icon: prediction['icon'],
+                maxTemp: prediction['maxTemp'],
+                minTemp: prediction['minTemp'],
+                date: Utils.formatSimpleDate(prediction['date']),
+              );
+            },
+          ),
         ],
       ),
     );
