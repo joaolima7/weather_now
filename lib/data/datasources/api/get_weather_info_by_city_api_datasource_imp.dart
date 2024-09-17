@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:weather_now/core/utils/conts.dart';
 import 'package:weather_now/core/utils/http_manager.dart';
 import 'package:weather_now/data/datasources/get_weather_info_by_city_datasource.dart';
+import 'package:weather_now/data/exceptions/city_not_found_exception.dart';
 import 'package:weather_now/domain/entities/weather_info.dart';
 
 class GetWeatherInfoByCityApiDataSourceImp
@@ -22,7 +23,7 @@ class GetWeatherInfoByCityApiDataSourceImp
       );
       return Right(WeatherInfoEntity.fromMap(response.data));
     } catch (e) {
-      return Left(Exception('Erro ao encontrar cidade!'));
+      return Left(CityNotFoundException('Falha ao encontrar cidade.'));
     }
   }
 }

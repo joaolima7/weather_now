@@ -5,5 +5,5 @@ const List<String> savedCities = [
   'Fortaleza',
   'São Paulo',
   'Rio de Janeiro',
-  'Curitiba'
+  'Curitiba',
 ];

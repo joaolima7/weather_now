@@ -46,28 +46,37 @@ class TodayPredictions extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 15),
-          Container(
-            height: 130,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: todayForecasts.length,
-              itemBuilder: (context, index) {
-                final forecast = todayForecasts[index];
+          if (todayForecasts.isNotEmpty)
+            Container(
+              height: 130,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: todayForecasts.length,
+                itemBuilder: (context, index) {
+                  final forecast = todayForecasts[index];
 
-                final temp = '${forecast.main.temp}°C';
-                final time = DateFormat('HH:mm').format(
-                  DateTime.parse(forecast.dtTxt!),
-                );
-
-                return ForecastDayItem(
-                  temp: temp,
-                  time: time,
-                  iconPath: Utils.getPathIconWeather(forecast.weather[0].icon),
-                  isHighlighted: index == highlightedIndex,
-                );
-              },
+                  return ForecastDayItem(
+                    temp: '${forecast.main.temp}°C',
+                    time: DateFormat('HH:mm').format(
+                      DateTime.parse(forecast.dtTxt!),
+                    ),
+                    iconPath:
+                        Utils.getPathIconWeather(forecast.weather[0].icon),
+                    isHighlighted: index == highlightedIndex,
+                  );
+                },
+              ),
+            )
+          else
+            const Center(
+              child: Text(
+                'Sem previsões pra hoje.',
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white),
+              ),
             ),
-          ),
         ],
       ),
     );

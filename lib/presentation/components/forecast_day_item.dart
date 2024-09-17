@@ -33,9 +33,12 @@ class ForecastDayItem extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Image.network(
-              iconPath,
-              width: 35,
+            child: Container(
+              height: 35,
+              child: Image.network(
+                iconPath,
+                width: 35,
+              ),
             ),
           ),
           Text(

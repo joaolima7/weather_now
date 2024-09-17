@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:weather_now/domain/entities/weather_info.dart';
 import 'package:weather_now/domain/repositories/get_weather_info_by_geolocation_repository.dart';
-import 'package:weather_now/domain/usecases/get_weather_info_by_geolocation/get_weather_info_by_geolocation_usecase.dart';
+import 'package:weather_now/domain/usecases/get_weather_info_by_geolocation_usecase/get_weather_info_by_geolocation_usecase.dart';
 
 class GetWheatherInfoByGeolocationUseCaseImp
     implements GetWeatherInfoByGeolocationUseCase {

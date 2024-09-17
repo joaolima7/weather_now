@@ -1,51 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:weather_now/data/exceptions/city_not_found_exception.dart';
+import 'package:weather_now/data/exceptions/geolocation_exception.dart';
 import 'package:weather_now/domain/usecases/get_weather_info_by_city_usecase/get_weather_info_by_city_usecase.dart';
 import 'package:get/get.dart';
-import 'package:weather_now/domain/usecases/get_weather_info_by_geolocation/get_weather_info_by_geolocation_usecase.dart';
+import 'package:weather_now/domain/usecases/get_weather_info_by_geolocation_usecase/get_weather_info_by_geolocation_usecase.dart';
 import '../../core/utils/utils.dart';
 import '../../domain/entities/forecast_entity.dart';
 import '../../domain/entities/weather_info.dart';
 import '../../domain/usecases/get_forecasts_usecase/get_forecasts_usecase.dart';
 
-class GetWeatherController extends GetxController {
+class GetWeatherApiController extends GetxController {
   final GetWeatherInfoByCityUseCase _getWeatherInfoByCityUseCase;
   final GetWeatherInfoByGeolocationUseCase _getWeatherInfoByGeolocationUseCase;
   final GetForecastsUseCase _getForecastsUseCase;
   final TextEditingController txtController = TextEditingController();
 
-  GetWeatherController(
+  GetWeatherApiController(
     this._getWeatherInfoByCityUseCase,
     this._getWeatherInfoByGeolocationUseCase,
     this._getForecastsUseCase,
   );
 
+//States
   var isLoading = false.obs;
   var isSearching = false.obs;
   var weatherInfo = WeatherInfoEntity.empty().obs;
   RxList<ForecastEntity> forecasts = <ForecastEntity>[].obs;
 
-  //Posição atual para inicio
+  //Position actually for initializing app
   Future<void> init() async {
     await Utils.determinePositionAndFetchWeather();
     await getWeatherByLocation();
   }
 
-  //Buscar Weather por cidade
+  //Search Weather by city name
   Future<void> getWeatherByCityName(String cityName) async {
     isLoading.value = true;
     var resultWeather = await _getWeatherInfoByCityUseCase(cityName);
     resultWeather.fold(
-      (error) => Utils.showGetSnackbar(
-          title: 'Erro', message: error.toString(), error: true),
+      (error) => {
+        if (error is CityNotFoundException)
+          {
+            Utils.showGetSnackbar(
+                title: 'Erro', message: error.toString(), error: true),
+          }
+        else
+          {
+            Utils.showGetSnackbar(
+              title: 'Erro',
+              message: 'Erro desconhecido.\nTente novamente mais tarde!',
+              error: true,
+            )
+          }
+      },
       (sucess) => weatherInfo.value = sucess,
     );
     await getForecastsByCityName(cityName);
     isLoading.value = false;
   }
 
-  //
+  //Search weather by geolocation
   Future<void> getWeatherByLocation() async {
     isLoading.value = true;
     Position position = await Geolocator.getCurrentPosition();
@@ -54,41 +70,52 @@ class GetWeatherController extends GetxController {
       lon: position.longitude,
     );
     result.fold(
-        (error) => Utils.showGetSnackbar(
-            title: 'Erro', message: error.toString(), error: true),
-        (sucess) => weatherInfo.value = sucess);
+      (error) {
+        if (error is GeolocationException) {
+          Utils.showGetSnackbar(
+              title: 'Erro', message: error.toString(), error: true);
+        } else {
+          Utils.showGetSnackbar(
+            title: 'Erro',
+            message: 'Erro desconhecido.\nTente novamente mais tarde!',
+            error: true,
+          );
+        }
+      },
+      (success) => weatherInfo.value = success,
+    );
     await getForecastsByGeolocation(
-        position.latitude.toString(), position.longitude.toString());
+      position.latitude.toString(),
+      position.longitude.toString(),
+    );
     isLoading.value = false;
   }
 
+  //Search forecasts by geolocation
   Future<void> getForecastsByGeolocation(String lat, String lon) async {
     var result = await _getForecastsUseCase(
       lat: lat,
       lon: lon,
     );
     result.fold(
-      (error) => Utils.showGetSnackbar(
-          title: 'Erro', message: error.toString(), error: true),
+      (error) => null,
       (sucess) => forecasts.value = sucess,
     );
   }
 
+  //Search forecasts by city name
   Future<void> getForecastsByCityName(String cityName) async {
     var result = await _getForecastsUseCase(cityName: cityName);
     result.fold(
-      (error) => Utils.showGetSnackbar(
-          title: 'Erro', message: error.toString(), error: true),
+      (error) => null,
       (sucess) => forecasts.value = sucess,
     );
   }
 
-  // Função para filtrar as previsões de hoje
+  // Filtering forecasts today
   List<ForecastEntity> getTodayForecasts() {
-    // Formata a data atual no mesmo formato do `dtTxt`
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    // Filtra as previsões com base na data
     return forecasts.where((forecast) {
       if (forecast.dtTxt != null) {
         return forecast.dtTxt!.startsWith(today);
@@ -97,7 +124,7 @@ class GetWeatherController extends GetxController {
     }).toList();
   }
 
-  // Função para encontrar o índice da previsão mais próxima do horário atual
+  // Filtering index forecasts
   int findClosestForecastIndex(List<ForecastEntity> todayForecasts) {
     final now = DateTime.now();
     int closestIndex = 0;
@@ -117,11 +144,10 @@ class GetWeatherController extends GetxController {
     return closestIndex;
   }
 
-  // Método para obter previsões futuras (excluindo as previsões de hoje)
+  // Filtering forecasts except today
   List<Map<String, dynamic>> getNextPredictions() {
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    // Filtra as previsões que não são de hoje
     final futureForecasts = forecasts.where((forecast) {
       if (forecast.dtTxt != null) {
         return !forecast.dtTxt!.startsWith(today);
@@ -129,7 +155,6 @@ class GetWeatherController extends GetxController {
       return false;
     }).toList();
 
-    // Agrupar as previsões por dia
     final Map<String, List<ForecastEntity>> groupedByDate = {};
     for (var forecast in futureForecasts) {
       final date =
@@ -141,7 +166,7 @@ class GetWeatherController extends GetxController {
       }
     }
 
-    // Encontrar a menor temperatura mínima e a maior temperatura máxima para cada dia
+    // Filtering min and max temps of all in the day
     final List<Map<String, dynamic>> nextPredictions = [];
     groupedByDate.forEach((date, forecasts) {
       double minTemp =
@@ -153,8 +178,7 @@ class GetWeatherController extends GetxController {
         'date': date,
         'minTemp': minTemp,
         'maxTemp': maxTemp,
-        'icon': forecasts
-            .first.weather[0].icon, // Exemplo para exibir um ícone qualquer
+        'icon': forecasts.first.weather[0].icon,
       });
     });
 
@@ -175,9 +199,5 @@ class GetWeatherController extends GetxController {
       Utils.showGetSnackbar(
           title: 'Erro', message: 'Busque uma cidade válida!');
     }
-  }
-
-  Future<void> teste() async {
-    var result = await _getForecastsUseCase(cityName: 'Sao Paulo');
   }
 }

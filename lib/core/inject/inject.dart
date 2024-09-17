@@ -15,10 +15,10 @@ import 'package:weather_now/domain/usecases/get_forecasts_usecase/get_forecasts_
 import 'package:weather_now/domain/usecases/get_forecasts_usecase/get_forecasts_usecase_imp.dart';
 import 'package:weather_now/domain/usecases/get_weather_info_by_city_usecase/get_weather_info_by_city_usecase.dart';
 import 'package:weather_now/domain/usecases/get_weather_info_by_city_usecase/get_weather_info_by_city_usecase_imp.dart';
-import 'package:weather_now/domain/usecases/get_weather_info_by_geolocation/get_weather_info_by_geolocation_usecase.dart';
-import 'package:weather_now/domain/usecases/get_weather_info_by_geolocation/get_weather_info_by_geolocation_usecase_imp.dart';
+import 'package:weather_now/domain/usecases/get_weather_info_by_geolocation_usecase/get_weather_info_by_geolocation_usecase.dart';
+import 'package:weather_now/domain/usecases/get_weather_info_by_geolocation_usecase/get_weather_info_by_geolocation_usecase_imp.dart';
 
-import '../../presentation/controllers/get_controller.dart';
+import '../../presentation/controllers/controller_api.dart';
 
 class Inject {
   static void init() {
@@ -55,8 +55,8 @@ class Inject {
         () => GetForecastsUsecaseImp(getIt()));
 
     //Controllers
-    getIt
-        .registerLazySingleton<GetWeatherController>(() => GetWeatherController(
+    getIt.registerLazySingleton<GetWeatherApiController>(
+        () => GetWeatherApiController(
               getIt(),
               getIt(),
               getIt(),

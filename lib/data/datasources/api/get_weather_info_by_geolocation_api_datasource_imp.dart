@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:weather_now/core/utils/conts.dart';
 import 'package:weather_now/core/utils/http_manager.dart';
 import 'package:weather_now/data/datasources/get_weather_info_by_geolocation_datasource.dart';
+import 'package:weather_now/data/exceptions/geolocation_exception.dart';
 import 'package:weather_now/domain/entities/weather_info.dart';
 
 class GetWeatherInfoByGeolocationApiDataSourceImp
@@ -24,7 +25,7 @@ class GetWeatherInfoByGeolocationApiDataSourceImp
       );
       return right(WeatherInfoEntity.fromMap(response.data));
     } catch (e) {
-      return left(Exception('Erro ao recuperar localização atual.'));
+      return left(GeolocationException('Falha na localização atual.'));
     }
   }
 }
