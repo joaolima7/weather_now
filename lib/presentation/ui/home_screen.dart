@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
 import 'package:lottie/lottie.dart';
 import 'package:weather_now/presentation/controllers/controller_api.dart';
+import 'package:weather_now/presentation/controllers/controller_dao.dart';
 import 'package:weather_now/presentation/widgets/app_bar.dart';
 import 'package:weather_now/presentation/widgets/container_info_items.dart';
 import 'package:weather_now/presentation/widgets/next_predictions.dart';
@@ -16,11 +17,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _controller = GetIt.I<GetWeatherApiController>();
+  final _controllerDao = GetIt.I<GetWeatherDaoController>();
 
   @override
   void initState() {
     super.initState();
     _controller.init();
+    _controllerDao.init();
   }
 
   @override

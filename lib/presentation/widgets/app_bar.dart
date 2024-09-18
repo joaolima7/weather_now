@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
-import '../../core/utils/conts.dart';
+import 'package:weather_now/presentation/controllers/controller_dao.dart';
 import '../components/search_bar_animated.dart';
 import '../controllers/controller_api.dart';
 
 class AppBarApp extends StatelessWidget {
   final _controller = GetIt.I<GetWeatherApiController>();
+  final _controllerDao = GetIt.I<GetWeatherDaoController>();
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +59,7 @@ class AppBarApp extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      isScrollControlled: true, // Permite ajustar a altura do BottomSheet
+      isScrollControlled: true,
       builder: (BuildContext context) {
         return DraggableScrollableSheet(
           initialChildSize: 0.4,
@@ -87,18 +88,44 @@ class AppBarApp extends StatelessWidget {
                         },
                       ),
                       const Divider(color: Colors.white24),
-                      ...savedCities.map((String city) {
-                        return ListTile(
-                          leading: const Icon(Icons.location_city,
-                              color: Colors.white),
-                          title: Text(city,
-                              style: const TextStyle(color: Colors.white)),
-                          onTap: () {
-                            Navigator.pop(context);
-                            _controller.getWeatherByCityName(city);
-                          },
-                        );
-                      }).toList(),
+                      Obx(() {
+                        if (_controllerDao.isLoading.value) {
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          );
+                        } else if (_controllerDao.recentCities.isEmpty) {
+                          return const Center(
+                            child: Text(
+                              'Nenhuma cidade recente...',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white),
+                            ),
+                          );
+                        } else {
+                          return Column(
+                            children:
+                                _controllerDao.recentCities.map((recentCity) {
+                              return ListTile(
+                                leading: const Icon(Icons.location_city,
+                                    color: Colors.white),
+                                title: Text(recentCity.cityName,
+                                    style:
+                                        const TextStyle(color: Colors.white)),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _controller.getWeatherByCityName(
+                                      recentCity.cityName);
+                                },
+                              );
+                            }).toList(),
+                          );
+                        }
+                      }),
                     ],
                   ),
                 ),

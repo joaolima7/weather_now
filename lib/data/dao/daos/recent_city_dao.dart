@@ -6,6 +6,9 @@ abstract class RecentCityDao {
   @Query('SELECT * FROM recent_cities ORDER BY id DESC')
   Future<List<RecentCityFloorEntity>> getAllRecentCities();
 
+  @Query('SELECT * FROM recent_cities WHERE cityName = :name LIMIT 1')
+  Future<RecentCityFloorEntity?> findCityByName(String name);
+
   @Insert(onConflict: OnConflictStrategy.replace)
   Future<void> insertRecentCity(RecentCityFloorEntity recent_city);
 

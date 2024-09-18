@@ -142,6 +142,15 @@ class _$RecentCityDao extends RecentCityDao {
   }
 
   @override
+  Future<RecentCityFloorEntity?> findCityByName(String name) async {
+    return _queryAdapter.query(
+        'SELECT * FROM recent_cities WHERE cityName = ?1 LIMIT 1',
+        mapper: (Map<String, Object?> row) => RecentCityFloorEntity(
+            id: row['id'] as int?, cityName: row['cityName'] as String),
+        arguments: [name]);
+  }
+
+  @override
   Future<void> deleteOldestRecentCity() async {
     await _queryAdapter.queryNoReturn(
         'DELETE FROM recent_cities WHERE id = (SELECT id FROM recent_cities ORDER BY id ASC LIMIT 1)');

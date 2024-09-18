@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
-import 'package:weather_now/data/exceptions/city_not_found_exception.dart';
-import 'package:weather_now/data/exceptions/geolocation_exception.dart';
+import 'package:weather_now/data/exceptions/get_weather_info_by_city/city_not_found_exception.dart';
+import 'package:weather_now/data/exceptions/get_weather_info_by_geolocation/geolocation_exception.dart';
+import 'package:weather_now/domain/entities/recent_city_entity.dart';
 import 'package:weather_now/domain/usecases/get_weather_info_by_city_usecase/get_weather_info_by_city_usecase.dart';
 import 'package:get/get.dart';
 import 'package:weather_now/domain/usecases/get_weather_info_by_geolocation_usecase/get_weather_info_by_geolocation_usecase.dart';
+import 'package:weather_now/presentation/controllers/controller_dao.dart';
 import '../../core/utils/utils.dart';
 import '../../domain/entities/forecast_entity.dart';
 import '../../domain/entities/weather_info.dart';
@@ -16,6 +19,7 @@ class GetWeatherApiController extends GetxController {
   final GetWeatherInfoByGeolocationUseCase _getWeatherInfoByGeolocationUseCase;
   final GetForecastsUseCase _getForecastsUseCase;
   final TextEditingController txtController = TextEditingController();
+  final _controllerDao = GetIt.I<GetWeatherDaoController>();
 
   GetWeatherApiController(
     this._getWeatherInfoByCityUseCase,
@@ -58,6 +62,8 @@ class GetWeatherApiController extends GetxController {
       (sucess) => weatherInfo.value = sucess,
     );
     await getForecastsByCityName(cityName);
+    await _controllerDao
+        .insertRecentCity(RecentCityEntity(cityName: weatherInfo.value.name));
     isLoading.value = false;
   }
 
