@@ -9,6 +9,8 @@ import 'package:weather_now/presentation/widgets/container_info_items.dart';
 import 'package:weather_now/presentation/widgets/next_predictions.dart';
 import 'package:weather_now/presentation/widgets/today_predictions.dart';
 import '../../core/utils/utils.dart';
+import '../../data/services/notification_android_service_imp.dart';
+import '../../domain/entities/custom_notification.dart';
 
 class HomeScreen extends StatefulWidget {
   @override

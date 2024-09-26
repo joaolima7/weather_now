@@ -14,15 +14,12 @@ class InsertRecentCityLocalDatasourceImp implements InsertRecentCityDatasource {
           .build();
       RecentCityDao recentCityDao = database.recentCityDao;
 
-      // Verifica se já existe um registro com o mesmo cityName
       final existingCity =
           await recentCityDao.findCityByName(recentCity.cityName);
       if (existingCity != null) {
-        // Se a cidade já existe, não insere e retorna sucesso
         return const Right(null);
       }
 
-      // Insere a nova cidade se ela não existir
       await recentCityDao.insertRecentCity(
           RecentCityFloorEntity(cityName: recentCity.cityName));
 

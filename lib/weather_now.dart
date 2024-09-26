@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:weather_now/core/utils/conts.dart';
 import 'package:weather_now/presentation/ui/home_screen.dart';
 
 class WeatherNow extends StatelessWidget {
@@ -8,8 +9,12 @@ class WeatherNow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       home: HomeScreen(),
+      routes: {
+        'home': (context) => HomeScreen(),
+      },
     );
   }
 }
