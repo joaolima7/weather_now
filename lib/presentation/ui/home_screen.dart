@@ -9,8 +9,6 @@ import 'package:weather_now/presentation/widgets/container_info_items.dart';
 import 'package:weather_now/presentation/widgets/next_predictions.dart';
 import 'package:weather_now/presentation/widgets/today_predictions.dart';
 import '../../core/utils/utils.dart';
-import '../../data/services/notification_android_service_imp.dart';
-import '../../domain/entities/custom_notification.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -72,10 +70,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                Lottie.asset(
-                  'assets/animations/weather.json',
-                  width: _sizeWidth * .4,
-                  height: _sizeWidth * .4,
+                Image.network(
+                  Utils.getPathIconWeather(weatherInfo.weather.first.icon),
                 ),
                 Text(
                   '${weatherInfo.main.temp}°',

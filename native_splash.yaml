@@ -1,0 +1,19 @@
+flutter_native_splash:
+  android: true
+  ios: true
+  web: false
+
+  color: "#000428"   
+  image: assets/images/weather.png  
+  #branding: assets/images/pin.png
+
+  color_dark: "#000000"
+  image_dark: assets/images/weather.png
+  #branding_dark: assets/images/pin.png
+
+  android_12:
+    color: "#000428"   
+    image: assets/images/weather.png  
+    #branding: assets/images/pin.png
+
+   
